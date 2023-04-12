@@ -69,7 +69,7 @@ export class PosPrinter {
              */
 
             let mainWindow = new BrowserWindow({
-                ...parsePaperSize(options.pageSize),
+                ...parsePaperSize(options.pageSize),    // window size
                 show: !!options.preview,
                 webPreferences: {
                     nodeIntegration: true,        // For electron >= 4.0.0
@@ -111,6 +111,7 @@ export class PosPrinter {
                         if (!options.preview) {
                             mainWindow.webContents.print({
                                 silent: !!options.silent,
+                                preview:!!options.preview,
                                 printBackground: !!options.printBackground,
                                 deviceName: options.printerName,
                                 copies: options?.copies || 1,

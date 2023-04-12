@@ -8,7 +8,7 @@ import {PaperSize, SizeOptions} from "./models";
  */
 export function sendIpcMsg(channel: any, webContents: any, arg: any) {
     return new Promise((resolve, reject) => {
-        // @ts-ignore
+        // @ts-ignore, render-line-reply
         ipcMain.once(`${channel}-reply`, (event, result) => {
             if (result.status) {
                 resolve(result);
@@ -20,39 +20,26 @@ export function sendIpcMsg(channel: any, webContents: any, arg: any) {
     });
 }
 
-
+//calc window size
 export function parsePaperSize(pageSize?: PaperSize | SizeOptions): { width: number, height: number } {
-    let width = 219, height = 1200;
+    let width = 219, height = 1500;
     if (typeof pageSize == 'string') {
         switch (pageSize) {
-            case "44mm":
-                width = 166;
-                break
-            case "57mm":
-                width = 215;
-                break;
-            case "58mm":
-                width = 219;
-                break;
-            case "76mm":
-                width = 287;
-                break;
-            case "78mm":
-                width = 295;
-                break;
-            case "80mm":
-                width = 302;
-                break;
+            case "44mm":width = 166;break;
+            case "57mm":width = 215;break;
+            case "58mm":width = 219;break;
+            case "76mm":width = 287;break;
+            case "78mm":width = 295;break;
+            case "80mm":width = 302;break;
         }
     } else if (typeof pageSize == "object") {
         width = pageSize.width;
         height = pageSize.height;
+        console.log("parsePaperSize: pageSize:width="+width+", height="+height);
     }
-
-    return {
-        width,
-        height
-    }
+    //width+=10;
+    console.log("parsePaperSize: width="+width+", height="+height);
+    return {width,height}
 }
 
 
@@ -60,34 +47,21 @@ export function parsePaperSizeInMicrons(pageSize?: PaperSize | SizeOptions): { w
     let width = 58000, height = 10000;  // in microns
     if (typeof pageSize == 'string') {
         switch (pageSize) {
-            case "44mm":
-                width = Math.ceil(44 * 1000);
-                break
-            case "57mm":
-                width = Math.ceil(57 * 1000);
-                break;
-            case "58mm":
-                width = Math.ceil(58 * 1000);
-                break;
-            case "76mm":
-                width = Math.ceil(76 * 1000);
-                break;
-            case "78mm":
-                width = Math.ceil(78 * 1000);
-                break;
-            case "80mm":
-                width = Math.ceil(80 * 1000);
-                break;
+            case "44mm":width = Math.ceil(44 * 1000);break
+            case "57mm":width = Math.ceil(57 * 1000);break;
+            case "58mm":width = Math.ceil(58 * 1000);break;
+            case "76mm":width = Math.ceil(76 * 1000);break;
+            case "78mm":width = Math.ceil(78 * 1000);break;
+            case "80mm":width = Math.ceil(80 * 1000);break;
         }
     } else if (typeof pageSize == "object") {
         width = convertPixelsToMicrons(pageSize.width);
         height = convertPixelsToMicrons(pageSize.height);
+        //console.log("parsePaperSizeInMicrons: pageSize:width="+width+", height="+height);
     }
+    console.log("parsePaperSizeInMicrons: width="+width+", height="+height);
 
-    return {
-        width,
-        height
-    }
+    return {width,height}
 }
 
 export function convertPixelsToMicrons(pixels: number): number {

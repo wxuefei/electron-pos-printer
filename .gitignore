@@ -66,4 +66,5 @@ typings/
 
 # test dir
 .idea/
-
+.vscode/
+.DS_Store

@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Electron Pos Printer Demo</title>
+<style>
+body {
+    height: 100%;
+    width: 100%;
+}
+.title {
+    font-size: 24px;
+}
+.btn {
+    font-size: 16px;
+    background-color: #3caf50;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 4px;
+    margin: 10px 0;
+    border: none;
+}
+</style>
+</head>
+<body>
+<h1 class="title">Elecron Printer Demo</h1>
+<button class="btn" onclick="queryPrinterInfo()">Printer info</button>
+<button class="btn" onclick="printPreview()">Preview test page</button>
+<button class="btn" onclick="print()">Print test page</button>
+<div id="info">
+</div>
+<script>
+    const { ipcRenderer } = require('electron');
+
+    function log(txt) {
+    	if(info)
+        info.innerHTML += txt + "<br>";
+    }
+    function queryPrinterInfo() {
+        ipcRenderer.send('printer-query-info');
+        ipcRenderer.once("printer-info", (event, data) => {
+            log("printerList:"+data);
+            data.forEach((item) => {
+                log("printer name: "+ item.name);
+                log("display Name: "+ item.displayName);
+                log("description: "+ item.description);
+                log("status: "+ item.status);
+                log("isDefault: "+ item.isDefault);
+                
+                if (item.isDefault) {
+                    this.printerName = item.name;
+                }
+                log("this: "+ this);
+            });
+        });
+    }
+    function print() {
+        ipcRenderer.send('printer-print', {});
+    }
+    function printPreview() {
+        log("printPreview: "+this.printerName);
+        ipcRenderer.send('printer-preview', {});
+    }
+
+
+</script>
+</body>
+</html>

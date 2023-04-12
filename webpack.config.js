@@ -46,7 +46,7 @@ module.exports = [
             minimizer: [new TerserPlugin()],
         },
         plugins: [
-            new BundleDeclarationsWebpackPlugin(),
+            //new BundleDeclarationsWebpackPlugin(),
         ],
 
     }),

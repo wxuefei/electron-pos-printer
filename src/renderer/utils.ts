@@ -32,8 +32,8 @@ export function generateTableCell(arg, type = 'td'): HTMLElement {
     let cellElement: HTMLElement;
 
     cellElement = document.createElement(type);
-    cellElement.innerHTML  = text
-    cellElement = applyElementStyles(cellElement, { padding: '7px 2px', ...arg.style })
+    cellElement.innerHTML  = text;
+    cellElement = applyElementStyles(cellElement, { ...arg.style });    //padding: '7px 2px',
 
     return cellElement;
 }
@@ -132,14 +132,15 @@ export function applyElementStyles(element: PageElement, style: PrintDataStyle):
  * */
 export function isValidHttpUrl(url: string) {
     let validURL;
-
+	var ret = true;
     try {
         validURL = new URL(url);
-    } catch (_) {
-        return false;
+		ret = validURL.protocol === "http:" || validURL.protocol === "https:";
+    } catch (e) {
+		console.log("isValidHttpUrl:"+e);
+        //ret = false;
     }
-
-    return validURL.protocol === "http:" || validURL.protocol === "https:";
+    return ret;
 }
 
 /**

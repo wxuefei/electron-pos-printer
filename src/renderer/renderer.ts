@@ -10,14 +10,14 @@ import {applyElementStyles, generatePageText, generateQRCode, generateTableCell,
 const ipcRender = require('electron').ipcRenderer;
 const JsBarcode = require("jsbarcode");
 
-
-const body = document.getElementById('main') as HTMLElement;
+const printContent = document.getElementById('printContent') as HTMLElement;
 /**
  * Initialize container in html view, by setting the width and margins specified in the PosPrinter options
  */
 ipcRender.on('body-init', function (event, arg) {
-    body.style.width = arg?.width || '100%';
-    body.style.margin = arg?.margin ||  0;
+    console.log("arg?.width =",arg?.width );
+    printContent.style.width = arg?.width || '100%';
+    printContent.style.margin = arg?.margin ||  0;
 
     event.sender.send('body-init-reply', {status: true, error: null});
 });
@@ -26,6 +26,14 @@ ipcRender.on('body-init', function (event, arg) {
  * Once the main process sends line data, render this data in the web page
  */
 ipcRender.on('render-line', renderDataToHTML);
+
+// <div style="width:100%;height:0px;border-top:1px black dashed;" />
+function generateDashLine(arg) {
+    let div = document.createElement('div') as HTMLElement;
+    div = applyElementStyles(div, {marginTop: '10px', marginBottom: '10px',width:'100%',height:'0px',borderTop:'1px dashed black', ...arg.style}) as HTMLElement;
+    return div;
+}
+
 /**
  * @function
  * @name generatePageText
@@ -34,10 +42,21 @@ ipcRender.on('render-line', renderDataToHTML);
  * @description Render data as HTML to page
  * */
 async function renderDataToHTML(event, arg) {
+    // event.sender.send('log','render:'+arg.line.type);
     switch (arg.line.type) {
+        case "dashLine":
+            try {
+                printContent.appendChild(generateDashLine(arg.line));
+                event.sender.send('render-line-reply', {status: true, error: null});
+                // event.sender.send('log','dashline:'+arg.line);
+            } catch (e) {
+                event.sender.send('log','dashline e='+e);
+                // event.sender.send('render-line-reply', {status: false, error: (e as any).toString()});
+            }
+            break;
         case 'text':
             try {
-                body.appendChild(generatePageText(arg.line));
+                printContent.appendChild(generatePageText(arg.line));
                 // sending msg
                 event.sender.send('render-line-reply', {status: true, error: null});
             } catch (e) {
@@ -48,7 +67,7 @@ async function renderDataToHTML(event, arg) {
             try {
                 const img = await renderImageToPage(arg.line);
 
-                body.appendChild(img);
+                printContent.appendChild(img);
                 event.sender.send('render-line-reply', {status: true, error: null});
             } catch (e) {
                 event.sender.send('render-line-reply', {status: false, error: (e as any).toString()});
@@ -65,7 +84,7 @@ async function renderDataToHTML(event, arg) {
                 applyElementStyles(qrCode, { 'textAlign': arg.line.position ? '-webkit-' + arg.line.position : '-webkit-left'});
 
                 container.appendChild(qrCode);
-                body.appendChild(container);
+                printContent.appendChild(container);
 
                 await generateQRCode(`qrCode${arg.lineIndex}`, {
                     value: arg.line.value,
@@ -83,7 +102,7 @@ async function renderDataToHTML(event, arg) {
             try {
                 const barcodeEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                 barcodeEl.setAttributeNS(null, 'id', `barCode-${arg.lineIndex}`);
-                body.appendChild(barcodeEl);
+                printContent.appendChild(barcodeEl);
                 
                 JsBarcode(`#barCode-${arg.lineIndex}`, arg.line.value, {
                     // format: "",
@@ -206,10 +225,12 @@ async function renderDataToHTML(event, arg) {
             table.appendChild(tBody);
             table.appendChild(tFooter);
             tableContainer.appendChild(table);
-            body.appendChild(tableContainer);
+            printContent.appendChild(tableContainer);
             // send
             event.sender.send('render-line-reply', {status: true, error: null});
-            return;
+            break;
+        default:
+            break;
     }
 }
 
